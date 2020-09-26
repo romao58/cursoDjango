@@ -1,0 +1,48 @@
+from django.forms import ModelForm
+from .models import *
+from django.shortcuts import render, redirect, get_object_or_404
+
+
+# Create your views here.
+
+class LivroForm(ModelForm):
+    class Meta:
+        model = Livro
+        fields = ['autor', 'editora', 'isbn', 'numeroPaginas', 'titulo', 'anoPublicacao','emailEditora']
+
+def livro_list(request, template_name='livro_list.html'):
+    livro = Livro.objects.all()
+    livros = {'lista': livro}
+    return render(request, template_name, livros)
+
+def livro_new(request, template_name='livro_form.html'):
+    form = LivroForm(request.POST or None)
+    if form.is_valid():
+        form.save()
+        return redirect('livro_list')
+    return render(request, template_name, {'form':form})
+
+def livro_edit(request, pk,template_name='livro_form.html'):
+    # Consultar um livro para obtê-lo através da sua chave primária
+    livro = get_object_or_404(Livro, pk=pk)
+    # Verificar se o formulário é do tipo “post’,
+    # caso positivo,
+    # criar um formulário com a instância do livro obtida do banco de dados e salvar as alterações.
+    if request.method == "POST" or None:
+        form = LivroForm(request.POST,instance=livro)
+        if form.is_valid():
+            livro =form.save()
+            return redirect('livro_list')
+        # Caso o formulário não seja do tipo ‘post’,
+        # renderizar, novamente, o formulário de edição dos livros
+    else:
+        form = LivroForm(instance=livro)
+    return render(request, template_name, {'form': form})
+
+def livro_remove(request, pk):
+    livro = Livro.objects.get(pk=pk)
+    if request.method == "POST":
+        livro.delete()
+        return redirect('livro_list')
+    return render(request,'livro_delete.html',{'livro': livro})
+
