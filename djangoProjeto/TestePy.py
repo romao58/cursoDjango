@@ -1,4 +1,4 @@
-import numpy as np
+# import numpy as np
 
 var_a = 2
 var_b = 3
